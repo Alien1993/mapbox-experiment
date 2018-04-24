@@ -22,7 +22,7 @@ Window {
         id: map
         anchors.fill: parent
         plugin: mapPlugin
-        center: QtPositioning.coordinate(43.108797, 12.388584) // Perugia
+        center: positionSource.position.coordinate // Current position
         zoomLevel: 14
         RouteQuery {
             id: routeQuery
@@ -57,14 +57,23 @@ Window {
             autoFitViewport: true
         }
 
+        PositionSource{
+            id: positionSource
+            active: true
+
+            onPositionChanged: {
+                routeQuery.waypoints[0] = positionSource.position.coordinate;
+            }
+        }
+
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                var startCoords = map.toCoordinate(Qt.point(mouse.x, mouse.y), true)
+                var endCoords = map.toCoordinate(Qt.point(mouse.x, mouse.y), true)
                 routeQuery.clearWaypoints();
-                routeQuery.addWaypoint(startCoords);
+                routeQuery.addWaypoint(positionSource.position.coordinate);
                 routeQuery.addWaypoint(
-                    QtPositioning.coordinate(43.114634, 12.389725)
+                    endCoords
                 );
 
                 routeModel.update();
